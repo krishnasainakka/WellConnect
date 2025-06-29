@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+@custom-variant dark {
+  .dark & {
+    @apply dark;
+  }
+}
