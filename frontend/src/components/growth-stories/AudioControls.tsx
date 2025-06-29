@@ -6,7 +6,7 @@ interface AudioControlsProps {
   isLoading: boolean;
   isPlaying: boolean;
   storyText: string;
-  audioRef: React.RefObject<HTMLAudioElement>;
+  audioRef: React.RefObject<HTMLAudioElement| null>;
   onPlayAudio: () => void;
   onPauseAudio: () => void;
   onResumeAudio: () => void;

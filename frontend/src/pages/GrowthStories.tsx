@@ -27,7 +27,7 @@ const GrowthStories: React.FC = () => {
   const [availableVoices, setAvailableVoices] = useState<Voice[]>([]);
   const [generatedStory, setGeneratedStory] = useState('');
   const [storyMeta, setStoryMeta] = useState<any>(null);
-  const [pendingStory, setPendingStory] = useState(''); // temporarily store story text
+  const [, setPendingStory] = useState(''); // temporarily store story text
 
   // Load voices when gender changes
   useEffect(() => {
