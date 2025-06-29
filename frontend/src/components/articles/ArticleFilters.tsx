@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Search, Filter, BookOpen, MessageCircle, Heart } from 'lucide-react';
+import { Search, BookOpen, MessageCircle, Heart } from 'lucide-react';
 
 interface ArticleFiltersProps {
   searchTerm: string;

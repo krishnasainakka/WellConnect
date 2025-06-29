@@ -625,14 +625,28 @@ const SessionReport: React.FC = () => {
                             <h4 className="font-semibold text-gray-900 dark:text-white mb-3">
                               {isTherapySession ? 'Goals Addressed' : 'Objectives Addressed'}
                             </h4>
-                            <div className="space-y-2">
-                              {progress?.goalsAddressed?.map((goal, index) => (
-                                <div key={index} className="flex items-center gap-2">
-                                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                                  <span className="text-gray-700 dark:text-gray-300">{goal}</span>
-                                </div>
-                              ))}
-                            </div>
+                            { progress && 'goalsAddressed' in progress && (
+                              <div className="space-y-2">
+                                {progress.goalsAddressed.map((goal: string, index: number) => (
+                                  <div key={index} className="flex items-center gap-2">
+                                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                                    <span className="text-gray-700 dark:text-gray-300">{goal}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            { progress && 'objectivesAddressed' in progress && (
+                              <div className="space-y-2">
+                                {progress.objectivesAddressed.map((obj: string, index: number) => (
+                                  <div key={index} className="flex items-center gap-2">
+                                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                                    <span className="text-gray-700 dark:text-gray-300">{obj}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+
                           </div>
                           <div>
                             <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Progress Level</h4>

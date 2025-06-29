@@ -22,7 +22,8 @@ export const useWebSocket = (coach: Coach | null, onError: (error: string) => vo
   // Initialize WebSocket
   useEffect(() => {
     console.log('🔌 Initializing WebSocket connection...');
-    const ws = new WebSocket('ws://localhost:8080');
+    const websocketUrl = import.meta.env.VITE_WEBSOCKET_URL;
+    const ws = new WebSocket(websocketUrl);
     wsRef.current = ws;
 
     ws.onopen = () => {
@@ -64,7 +65,7 @@ export const useWebSocket = (coach: Coach | null, onError: (error: string) => vo
 
       if (data.user) {
         setLiveText('');
-        setMessages(prev => [...prev, { role: 'user', content: data.user, id: Date.now() }]);
+        setMessages(prev => [...prev, { role: 'user', content: data.user ?? '', id: Date.now() }]);
         currentGeminiMessageRef.current = '';
       }
 

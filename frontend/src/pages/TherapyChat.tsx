@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Heart, MessageCircle, Shield, Calendar, Loader2, Users, BookOpen, TrendingUp, Zap, Brain, Activity } from 'lucide-react';
-import { Card } from '../components/ui/Card';
+import { Search, Heart, MessageCircle, Shield, Calendar, Loader2, Users, BookOpen, Zap, Brain } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Avatar } from '../components/ui/Avatar';
 import { useNavigate } from 'react-router-dom';

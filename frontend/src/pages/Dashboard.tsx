@@ -37,6 +37,7 @@ interface UserStats {
 interface CommunicationCoach {
   _id: string;
   name: string;
+  topic: string;
   shortDescription: string;
   category: string;
   avatarUrl: string;
@@ -62,7 +63,7 @@ export const Dashboard: React.FC = () => {
   const [recentCoaches, setRecentCoaches] = useState<CommunicationCoach[]>([]);
   const [recentTherapy, setRecentTherapy] = useState<TherapyCoach[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);  
+  const [, setError] = useState<string | null>(null);  
   const [todayQuote, setTodayQuote] = useState<Quote | null>(null);
 
   const userId = user?.id; 

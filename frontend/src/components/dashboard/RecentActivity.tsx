@@ -11,7 +11,7 @@ import {
   MessageCircle,
   Heart,
 } from 'lucide-react';
-import { Button } from '../ui/button';
+import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 
 interface Activity {
