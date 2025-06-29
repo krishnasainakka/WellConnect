@@ -5,6 +5,7 @@ import { Play, Pause, Square, Volume2, Settings, Download } from 'lucide-react';
 interface EnhancedVoiceControlsProps {
   isPlaying: boolean;
   isPaused: boolean;
+  isLoading: boolean; 
   progress: number;
   currentTime: number;
   duration: number;
@@ -18,6 +19,7 @@ interface EnhancedVoiceControlsProps {
 export const EnhancedVoiceControls: React.FC<EnhancedVoiceControlsProps> = ({
   isPlaying,
   isPaused,
+  isLoading,
   progress,
   currentTime,
   duration,
@@ -83,22 +85,35 @@ export const EnhancedVoiceControls: React.FC<EnhancedVoiceControlsProps> = ({
       {/* Controls */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onPlay}
-            disabled={isPlaying && !isPaused}
-            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${
-              isPlaying && !isPaused
-                ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white shadow-lg'
-            }`}
-          >
-            <Play className="w-5 h-5" />
-            <span>Play Article</span>
-          </motion.button>
 
-          {isPlaying && (
+          {/* Play / Loading */}
+          {isLoading ? (
+            <div className="flex items-center gap-3 text-gray-600 dark:text-gray-400 animate-pulse">
+              <svg className="w-5 h-5 animate-spin text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+              </svg>
+              <span>Preparing audio...</span>
+            </div>
+          ) : (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onPlay}
+              disabled={isPlaying && !isPaused}
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${
+                isPlaying && !isPaused
+                  ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white shadow-lg'
+              }`}
+            >
+              <Play className="w-5 h-5" />
+              <span>Play Article</span>
+            </motion.button>
+          )}
+
+          {/* Pause / Stop */}
+          {isPlaying && !isLoading && (
             <>
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -123,6 +138,7 @@ export const EnhancedVoiceControls: React.FC<EnhancedVoiceControlsProps> = ({
           )}
         </div>
 
+        {/* Download Button (you can wire this up later) */}
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}

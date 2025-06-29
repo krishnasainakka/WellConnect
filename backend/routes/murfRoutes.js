@@ -5,6 +5,10 @@ import axios from 'axios';
 const router = express.Router();
 dotenv.config();
 
+const MURF_API_URL = 'https://api.murf.ai/v1/speech/stream';
+const MURF_API_KEY = process.env.MURF_API_KEY;
+const MAX_CHARS = 800;
+
 // Voice data 
 const voiceData = {
   'en-US': [
@@ -144,33 +148,61 @@ router.get('/voices', (req, res) => {
   res.json({ voices });
 });
 
-// Route to stream TTS from Murf and send back audio file
+
+function splitTextIntoChunks(text, maxLength = MAX_CHARS) {
+  const words = text.split(' ');
+  const chunks = [];
+  let currentChunk = '';
+
+  for (const word of words) {
+    if ((currentChunk + ' ' + word).trim().length > maxLength) {
+      chunks.push(currentChunk.trim());
+      currentChunk = word;
+    } else {
+      currentChunk += ' ' + word;
+    }
+  }
+
+  if (currentChunk) chunks.push(currentChunk.trim());
+  return chunks;
+}
+
 router.post('/stream', async (req, res) => {
   const { text, voiceId = 'en-US-natalie', style = 'Conversational', speed = 1.0 } = req.body;
-  const apiUrl = 'https://api.murf.ai/v1/speech/stream';
-  const apiKey = process.env.MURF_API_KEY;
+
+  if (!text || !MURF_API_KEY) {
+    return res.status(400).json({ error: 'Missing text or API key' });
+  }
+
+  const chunks = splitTextIntoChunks(text, MAX_CHARS);
+
+  res.setHeader('Content-Type', 'audio/wav');
 
   try {
-    const requestBody = {
-      text,
-      voiceId,
-      style,
-      speed
-    };
+    for (const chunk of chunks) {
+      const requestBody = { text: chunk, voiceId, style, speed };
 
-    const response = await axios.post(apiUrl, requestBody, {
-      headers: {
-        'Content-Type': 'application/json',
-        'api-key': apiKey,
-      },
-      responseType: 'stream',
-    });
+      const response = await axios.post(MURF_API_URL, requestBody, {
+        headers: {
+          'Content-Type': 'application/json',
+          'api-key': MURF_API_KEY,
+        },
+        responseType: 'stream',
+      });
 
-    res.setHeader('Content-Type', 'audio/wav');
-    response.data.pipe(res);
+      await new Promise((resolve, reject) => {
+        response.data.on('data', (data) => res.write(data));
+        response.data.on('end', resolve);
+        response.data.on('error', reject);
+      });
+    }
+
+    res.end(); 
   } catch (error) {
-    console.error('TTS Error:', error.message);
-    res.status(500).json({ error: 'TTS failed' });
+    console.error('TTS streaming error:', error.response?.data || error.message);
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'TTS stream failed' });
+    }
   }
 });
 
@@ -207,21 +239,34 @@ router.post('/test-voice', async (req, res) => {
 
 router.post('/translate', async (req, res) => {
   const { text, targetLanguage } = req.body;
-  try {
-    const response = await axios.post('https://api.murf.ai/v1/text/translate', {
-      targetLanguage,
-      texts: [text],
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-        'api-key': process.env.MURF_API_KEY,
-      },
-    });
 
-    const translatedText = response.data.translations?.[0]?.translated_text;
+  if (!text || !targetLanguage) {
+    return res.status(400).json({ error: 'Missing text or target language' });
+  }
+
+  try {
+    const chunks = splitTextIntoChunks(text);
+    const translations = [];
+
+    for (const chunk of chunks) {
+      const response = await axios.post('https://api.murf.ai/v1/text/translate', {
+        targetLanguage,
+        texts: [chunk],
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'api-key': process.env.MURF_API_KEY,
+        },
+      });
+
+      const translatedChunk = response.data.translations?.[0]?.translated_text || '';
+      translations.push(translatedChunk);
+    }
+
+    const translatedText = translations.join(' ');
     res.json({ translatedText });
   } catch (error) {
-    console.error('Translation API error:', error.message);
+    console.error('Translation API error:', error?.response?.data || error.message);
     res.status(500).json({ error: 'Translation failed' });
   }
 });
@@ -236,31 +281,42 @@ router.post('/translated-voice', async (req, res) => {
   const apiKey = process.env.MURF_API_KEY;
   const apiUrl = 'https://api.murf.ai/v1/speech/stream';
 
-  const requestBody = {
-    text,
-    voiceId: voiceId || 'en-US-natalie',
-    multiNativeLocale: targetLang,
-    style,
-    speed
-  };
+  const chunks = splitTextIntoChunks(text, 800); // reuse splitter
+
+  res.setHeader('Content-Type', 'audio/wav');
+  res.setHeader('Transfer-Encoding', 'chunked');
 
   try {
-    console.log('Sending to Murf:', requestBody);
+    for (const chunk of chunks) {
+      const requestBody = {
+        text: chunk,
+        voiceId: voiceId || 'en-US-natalie',
+        multiNativeLocale: targetLang,
+        style,
+        speed
+      };
 
-    const response = await axios.post(apiUrl, requestBody, {
-      headers: {
-        'Content-Type': 'application/json',
-        'api-key': apiKey,
-      },
-      responseType: 'stream',
-    });
+      const response = await axios.post(apiUrl, requestBody, {
+        headers: {
+          'Content-Type': 'application/json',
+          'api-key': apiKey,
+        },
+        responseType: 'stream',
+      });
 
-    res.setHeader('Content-Type', 'audio/wav');
-    res.setHeader('Transfer-Encoding', 'chunked');
-    response.data.pipe(res);
+      await new Promise((resolve, reject) => {
+        response.data.on('data', (data) => res.write(data));
+        response.data.on('end', resolve);
+        response.data.on('error', reject);
+      });
+    }
+
+    res.end();
   } catch (error) {
     console.error('TTS translation error:', error?.response?.data || error.message);
-    res.status(500).json({ error: 'TTS translation failed' });
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'TTS translation failed' });
+    }
   }
 });
 

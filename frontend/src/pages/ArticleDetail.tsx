@@ -52,6 +52,8 @@ const ArticleDetail: React.FC = () => {
   const [translatedContent, setTranslatedContent] = useState<string | null>(null);
   const [targetLang, setTargetLang] = useState<string>('en-US');
   const [isTranslating, setIsTranslating] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   
   // Voice settings state
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
@@ -139,49 +141,60 @@ const ArticleDetail: React.FC = () => {
   };
 
   const handlePlay = async () => {
-    if (!article || isPlaying) return;
+  if (!article || isPlaying) return;
 
-    if (currentAudio) {
-      currentAudio.pause();
-      currentAudio.currentTime = 0;
-    }
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+  }
 
-    setIsPlaying(true);
-    setIsPaused(false);
+  setIsLoading(true);
+  setIsPlaying(false);
+  setIsPaused(false);
 
-    try {
-      const response = await fetch(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/tts/stream`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          text: article.fullContent,
-          voiceId: voiceSettings.voiceId,
-          style: voiceSettings.style,
-          speed: voiceSettings.speed
-        }),
-      });
+  try {
+    const response = await fetch(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/tts/stream`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        text: article.fullContent,
+        voiceId: voiceSettings.voiceId,
+        style: voiceSettings.style,
+        speed: voiceSettings.speed
+      }),
+    });
 
-      if (!response.ok) throw new Error('Failed to fetch audio');
+    if (!response.ok) throw new Error('Failed to fetch audio');
 
-      const blob = await response.blob();
-      const audioURL = URL.createObjectURL(blob);
-      const newAudio = new Audio(audioURL);
+    const blob = await response.blob();
+    const audioURL = URL.createObjectURL(blob);
+    const newAudio = new Audio(audioURL);
 
-      newAudio.onloadedmetadata = () => setDuration(newAudio.duration);
-      newAudio.ontimeupdate = () => setCurrentTime(newAudio.currentTime);
-      newAudio.onended = () => {
-        setIsPlaying(false);
-        setProgress(0);
-      };
-      newAudio.onerror = () => setIsPlaying(false);
-
-      setCurrentAudio(newAudio);
-      newAudio.play();
-    } catch (err) {
-      console.error('Playback error:', err);
+    // These will trigger later when audio starts
+    newAudio.onplay = () => {
+      setIsLoading(false);
+      setIsPlaying(true);
+    };
+    newAudio.onloadedmetadata = () => setDuration(newAudio.duration);
+    newAudio.ontimeupdate = () => setCurrentTime(newAudio.currentTime);
+    newAudio.onended = () => {
       setIsPlaying(false);
-    }
-  };
+      setProgress(0);
+    };
+    newAudio.onerror = () => {
+      setIsPlaying(false);
+      setIsLoading(false);
+    };
+
+    setCurrentAudio(newAudio);
+    newAudio.play();
+  } catch (err) {
+    console.error('Playback error:', err);
+    setIsPlaying(false);
+    setIsLoading(false);
+  }
+};
+
 
   const handlePlayTranslated = async () => {
     if (!translatedContent || isPlaying) return;
@@ -401,6 +414,7 @@ const ArticleDetail: React.FC = () => {
           <EnhancedVoiceControls
             isPlaying={isPlaying}
             isPaused={isPaused}
+            isLoading={isLoading}
             progress={progress}
             currentTime={currentTime}
             duration={duration}
