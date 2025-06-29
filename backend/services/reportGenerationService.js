@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'; 
-import CommunicationSession from '../models/communicationSession.js'; 
+import CommunicationSession from '../models/CommunicationSession.js'; 
 import TherapySession from '../models/TherapySession.js';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -10,7 +10,7 @@ const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
 export async function generateSessionReportTherapy(conversationHistory, therapyCoach, userId) {
   try {
-    console.log('🧠 Generating therapy session report with Gemini...');
+    console.log(' Generating therapy session report with Gemini...');
     
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     
@@ -131,7 +131,7 @@ Please provide a comprehensive therapeutic analysis in the following JSON format
     const response = result.response;
     const text = response.text();
     
-    console.log('🧠 Raw Gemini therapy response:', text);
+    console.log(' Raw Gemini therapy response:', text);
     
     // Parse the JSON response
     let reportData;
@@ -232,11 +232,11 @@ Please provide a comprehensive therapeutic analysis in the following JSON format
       }
     };
     
-    console.log('✅ Generated therapy report:', validatedReport);
+    console.log(' Generated therapy report:', validatedReport);
     return validatedReport;
     
   } catch (error) {
-    console.error('❌ Error generating therapy session report:', error);
+    console.error(' Error generating therapy session report:', error);
     
     // Return a realistic fallback report for minimal therapeutic engagement
     return {
@@ -289,7 +289,7 @@ Please provide a comprehensive therapeutic analysis in the following JSON format
 
 export async function generateSessionReport(conversationHistory, coach, userId) {
   try {
-    console.log('🤖 Generating session report with Gemini...');
+    console.log(' Generating session report with Gemini...');
     
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     
@@ -389,7 +389,7 @@ Please provide a comprehensive analysis in the following JSON format (respond wi
     const response = result.response;
     const text = response.text();
     
-    console.log('🤖 Raw Gemini response:', text);
+    console.log(' Raw Gemini response:', text);
     
     // Parse the JSON response
     let reportData;
@@ -466,11 +466,11 @@ Please provide a comprehensive analysis in the following JSON format (respond wi
       coachingReadiness: reportData.coachingReadiness || "User shows basic readiness for coaching with room for increased engagement"
     };
     
-    console.log('✅ Generated report:', validatedReport);
+    console.log(' Generated report:', validatedReport);
     return validatedReport;
     
   } catch (error) {
-    console.error('❌ Error generating session report:', error);
+    console.error(' Error generating session report:', error);
     
     // Return a realistic fallback report for minimal engagement
     return {
@@ -514,7 +514,7 @@ Please provide a comprehensive analysis in the following JSON format (respond wi
 
 export async function saveSessionAndGenerateReport(userId, coachId, conversationHistory, coach, startTime, coachType) {
   try {
-    console.log('💾 Saving session and generating report...');
+    console.log(' Saving session and generating report...');
     
     const endTime = new Date();
     const durationInSeconds = Math.floor((endTime - startTime) / 1000);
@@ -551,12 +551,12 @@ export async function saveSessionAndGenerateReport(userId, coachId, conversation
     }
 
     const savedSession = await session.save();
-    console.log('✅ Session saved with ID:', savedSession._id);
+    console.log(' Session saved with ID:', savedSession._id);
     
     return savedSession;
 
   } catch (error) {
-    console.error('❌ Error saving session and generating report:', error);
+    console.error(' Error saving session and generating report:', error);
     throw error;
   }
 }
