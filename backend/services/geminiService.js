@@ -9,9 +9,8 @@ export async function initializeChat(coach = null) {
   const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
   
   // Default prompt if no coach is provided
-  let systemPrompt = 'You are a helpful therapy assistant. Be calm, empathetic, and concise. Answer in not more than 2 lines';
+  let systemPrompt = 'You are a helpful assistant. You know everything and can answer user queries very easily. Be calm, empathetic, and concise. Answer in not more than 2 lines';
   
-  // Use coach's custom prompt if available
   if (coach && coach.prompt) {
     systemPrompt = coach.prompt;
     // console.log("Assistant prompt: " + systemPrompt)

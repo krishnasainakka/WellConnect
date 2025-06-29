@@ -92,10 +92,10 @@ export const useAudio = (onAudioData: (data: ArrayBuffer) => void, onError: (err
       source.connect(processor);
       processor.connect(audioContext.destination);
       setIsRecording(true);
-      console.log('🎤 Recording started');
+      console.log(' Recording started');
 
     } catch (err) {
-      console.error('🎤 Failed to start recording:', err);
+      console.error(' Failed to start recording:', err);
       onError('Microphone access denied or unavailable.');
     }
   };
@@ -108,7 +108,7 @@ export const useAudio = (onAudioData: (data: ArrayBuffer) => void, onError: (err
       mediaStreamRef.current?.getTracks().forEach(track => track.stop());
       mediaStreamRef.current = null;
       setIsRecording(false);
-      console.log('🛑 Recording stopped');
+      console.log(' Recording stopped');
     } catch (err) {
       console.error('Error stopping recording:', err);
     }

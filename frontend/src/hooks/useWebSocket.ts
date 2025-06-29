@@ -21,29 +21,29 @@ export const useWebSocket = (coach: Coach | null, onError: (error: string) => vo
 
   // Initialize WebSocket
   useEffect(() => {
-    console.log('🔌 Initializing WebSocket connection...');
+    console.log(' Initializing WebSocket connection...');
     const websocketUrl = import.meta.env.VITE_WEBSOCKET_URL;
     const ws = new WebSocket(websocketUrl);
     wsRef.current = ws;
 
     ws.onopen = () => {
-      console.log('🔗 WebSocket connected');
+      console.log(' WebSocket connected');
       setIsConnected(true);
       onError('');
     };
  
     ws.onmessage = (event) => {
       const data: WebSocketMessage = JSON.parse(event.data);
-      console.log('📥 WebSocket message received:', data);
+      console.log(' WebSocket message received:', data);
 
       if (data.type === 'coachSetup') {
-        console.log('✅ Coach setup confirmed');
+        console.log(' Coach setup confirmed');
         setCoachSetup(true);
         return;
       }
 
       if (data.type === 'initialMessage') {
-        console.log('📨 Initial message received');
+        console.log(' Initial message received');
         setInitialMessageReceived(true);
         currentGeminiMessageRef.current = '';
         if (data.geminiChunk) {
@@ -84,7 +84,7 @@ export const useWebSocket = (coach: Coach | null, onError: (error: string) => vo
       }
 
       if (data.geminiDone) {
-        console.log('✅ Gemini response complete');
+        console.log(' Gemini response complete');
         currentGeminiMessageRef.current = '';
       }
 
@@ -113,14 +113,14 @@ export const useWebSocket = (coach: Coach | null, onError: (error: string) => vo
       }
 
       if (data.error) {
-        console.error('❌ WebSocket error:', data.error);
+        console.error(' WebSocket error:', data.error);
         onError(data.error);
         if (data.fallbackText) setMessages(prev => [...prev, { role: 'system', content: `[Error] ${data.fallbackText}`, id: Date.now() }]);
       }
     };
 
     ws.onclose = () => {
-      console.log('🔌 WebSocket disconnected');
+      console.log(' WebSocket disconnected');
       setIsConnected(false);
       setCoachSetup(false);
       setInitialMessageReceived(false);
@@ -129,15 +129,15 @@ export const useWebSocket = (coach: Coach | null, onError: (error: string) => vo
     };
 
     ws.onerror = (error) => {
-      console.error('❌ WebSocket error:', error);
+      console.error(' WebSocket error:', error);
       onError('WebSocket connection error');
       setIsConnected(false);
     };
 
     return () => {
-      console.log('🧹 Running WebSocket cleanup');
+      console.log(' Running WebSocket cleanup');
       if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-        console.log('🔌 Closing WebSocket due to cleanup');
+        console.log(' Closing WebSocket due to cleanup');
         wsRef.current.close();
       }
       wsRef.current = null;
@@ -148,7 +148,7 @@ export const useWebSocket = (coach: Coach | null, onError: (error: string) => vo
 
   // Send coach selection when ready
   useEffect(() => {
-    console.log('🧪 Checking if coach selection should be sent', {
+    console.log(' Checking if coach selection should be sent', {
       coach: !!coach,
       isConnected,
       wsReady: wsRef.current?.readyState === WebSocket.OPEN,
@@ -156,7 +156,7 @@ export const useWebSocket = (coach: Coach | null, onError: (error: string) => vo
     });
     
     if (coach && isConnected && wsRef.current && wsRef.current.readyState === WebSocket.OPEN && !coachSelectionSentRef.current) {
-      console.log('📨 Sending coach selection:', coach.name);
+      console.log(' Sending coach selection:', coach.name);
       const coachMessage = { 
         type: 'selectCoach', 
         coach,
@@ -181,7 +181,7 @@ export const useWebSocket = (coach: Coach | null, onError: (error: string) => vo
 
   const startSession = (_unused: any, coachType?: string) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN && coachSetup) {
-      console.log('🚀 Starting session');
+      console.log(' Starting session');
       wsRef.current.send(JSON.stringify({ 
         type: 'startSession',
         voiceConfig: coach?.voiceSettings,
@@ -193,7 +193,7 @@ export const useWebSocket = (coach: Coach | null, onError: (error: string) => vo
   };
 
   const endSession = () => {
-    console.log('🛑 Ending session');
+    console.log(' Ending session');
     
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({ 

@@ -14,6 +14,7 @@ import reportRoutes from './routes/reportRoutes.js';
 import murfRoutes from './routes/murfRoutes.js';
 import articlesRoutes from './routes/articlesRoutes.js';
 import quotesRoutes from './routes/quotesRoutes.js';
+import storyRoutes from './routes/storyRoutes.js';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -39,6 +40,7 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/articles', articlesRoutes);
 app.use('/api/tts', murfRoutes);
 app.use('/api/quotes', quotesRoutes);
+app.use('/api/story', storyRoutes);
 
 app.get('/', (req, res) => res.send('Voice Chatbot backend running'));
 

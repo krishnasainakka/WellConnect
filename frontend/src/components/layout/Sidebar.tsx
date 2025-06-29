@@ -6,6 +6,7 @@ import {
   Heart, 
   BarChart3, 
   Award,
+  Sparkles,
   // Plus,
   // ChevronDown,
   ChevronRight,
@@ -23,8 +24,9 @@ interface SidebarItem {
 const sidebarItems: SidebarItem[] = [
   { icon: <Home className="w-5 h-5" />, label: 'Dashboard', path: '/dashboard' },
   { icon: <MessageCircle className="w-5 h-5" />, label: 'Communication Coach', path: '/conversation' },
-  { icon: <Heart className="w-5 h-5" />, label: 'Therapy Chat', path: '/therapy' },
+  { icon: <Heart className="w-5 h-5" />, label: 'Therapy Assistant', path: '/therapy' },
   { icon: <BookOpen className="w-5 h-5" />, label: 'Articles', path: '/articles' },
+  { icon: <Sparkles className="w-5 h-5" />, label: 'Growth Stories', path: '/growth-stories' },
   { icon: <BarChart3 className="w-5 h-5" />, label: 'Session History', path: '/history' },
   { icon: <Award className="w-5 h-5" />, label: 'Achievements', path: '/achievements' },
   // { 

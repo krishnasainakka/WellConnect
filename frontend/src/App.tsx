@@ -19,6 +19,7 @@ import VoiceAssistant from './pages/VoiceAssistant';
 import SessionReport from './pages/SessionReport';
 import ArticlesList from './pages/ArticlesList';
 import ArticleDetail from './pages/ArticleDetail';
+import GrowthStories from './pages/GrowthStories';
 
 // Protected route wrapper
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -90,6 +91,7 @@ const InnerApp = () => {
         <Route path="/history" element={<ProtectedRoute><SessionHistory /></ProtectedRoute>} />
         <Route path="/articles" element={<ProtectedRoute><ArticlesList /></ProtectedRoute>} />
         <Route path="/articles/:id" element={<ProtectedRoute><ArticleDetail /></ProtectedRoute>} />
+        <Route path="/growth-stories" element={<ProtectedRoute><GrowthStories /></ProtectedRoute>} />
         <Route path="/voice-assistant/:type/:id" element={<ProtectedRoute><VoiceAssistant /></ProtectedRoute>} />
         <Route path="/session-report/:sessionId" element={<ProtectedRoute><SessionReport /></ProtectedRoute>} />
         <Route path="/achievements" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />

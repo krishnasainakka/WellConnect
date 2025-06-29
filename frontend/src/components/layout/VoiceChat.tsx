@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { Coach } from '../../types';
 import StatusIndicators from './StatusIndicators';
 
@@ -33,6 +33,41 @@ const VoiceChat: React.FC<VoiceChatProps> = ({
   onToggleMicrophone,
   onClearError
 }) => {
+  const [timeLeft, setTimeLeft] = useState<number>(0);
+  const sessionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const timerInitializedRef = useRef<boolean>(false); // To avoid reinitializing timer
+
+  useEffect(() => {
+    if (sessionStarted && !timerInitializedRef.current) {
+      setTimeLeft(15 * 60); // 15 minutes
+      timerInitializedRef.current = true;
+
+      sessionTimeoutRef.current = setTimeout(() => {
+        onEndSession();
+      }, 15 * 60 * 1000);
+
+      intervalRef.current = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
+    }
+
+    if (!sessionStarted) {
+      if (sessionTimeoutRef.current) clearTimeout(sessionTimeoutRef.current);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      sessionTimeoutRef.current = null;
+      intervalRef.current = null;
+      timerInitializedRef.current = false;
+      setTimeLeft(0);
+    }
+  }, [sessionStarted, onEndSession]);
+
+  const formatTime = (seconds: number): string => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
   const getStatusMessage = () => {
     if (!isConnected) return 'Connecting...';
     if (!coachSetup) return 'Setting up coach...';
@@ -44,7 +79,20 @@ const VoiceChat: React.FC<VoiceChatProps> = ({
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 h-full border border-gray-200 dark:border-gray-700">
+    <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 h-full border border-gray-200 dark:border-gray-700">
+      
+      {/* Countdown Timer */}
+      {sessionStarted && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
+          <div className={`px-6 py-2 rounded-full shadow-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900
+            ${timeLeft <= 60 ? 'animate-pulse' : ''}`}>
+            <span className="text-3xl font-bold text-red-600 tracking-widest">
+              {formatTime(timeLeft)}
+            </span>
+          </div>
+        </div>
+      )}
+
       <div className="text-center mb-8">
         <div className="relative mb-6">
           <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 dark:from-blue-600 dark:to-purple-700 rounded-full mx-auto flex items-center justify-center shadow-lg">
@@ -58,6 +106,7 @@ const VoiceChat: React.FC<VoiceChatProps> = ({
             </div>
           )}
         </div>
+
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
           {coach?.name || 'Communication Coach'}
         </h2>
@@ -123,6 +172,7 @@ const VoiceChat: React.FC<VoiceChatProps> = ({
           )}
         </div>
 
+        {/* Error Message */}
         {error && (
           <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
             <div className="flex items-center justify-between">
